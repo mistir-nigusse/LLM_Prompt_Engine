@@ -8,7 +8,6 @@ from app.services.prompt_generation import generate_prompt
 def generate_prompt_api():
     topic = request.json.get('topic')
     prompt = generate_prompt(topic)
-    print({'prompt': prompt})
-
-    # return jsonify({'prompt': prompt})
+    # print({'prompt': prompt})
+    return jsonify({'prompt': prompt})
 
