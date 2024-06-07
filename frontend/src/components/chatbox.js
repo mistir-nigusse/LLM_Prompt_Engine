@@ -2,64 +2,62 @@ import React, { useState } from "react";
 import axios from 'axios';
 
 const ChatBox = () => {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
+  const [pdfFile, setPdfFile] = useState(null);
+  const [textPrompt, setTextPrompt] = useState('');
+  const [prompts, setPrompts] = useState([]);
 
-  const handleSend = async () => {
-    if (input.trim()) {
-      const newMessages = [...messages, { sender: "user", text: input }];
-      setMessages(newMessages);
-      setInput("");
+  const handleFileChange = (e) => {
+    setPdfFile(e.target.files[0]);
+  };
 
-      try {
-        const response = await axios.post('http://localhost:5000/generate_prompt', {
-          topic: input,
-        });
+  const handlePromptChange = (e) => {
+    setTextPrompt(e.target.value);
+  };
 
-        const aiResponse = response.data.prediction;
+  const handleUpload = () => {
+    const formData = new FormData();
+    formData.append('pdf', pdfFile);
+    formData.append('prompt', textPrompt);
 
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { sender: "ai", text: aiResponse },
-        ]);
-      } catch (error) {
-        console.error("Error on fetching generated prompts:", error);
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          { sender: "ai", text: "Error on fetching prompts." },
-        ]);
-      }
-    }
+    axios.post('http://localhost:5000/generate_prompt', formData)
+      .then(response => {
+        setPrompts(response.data.prompts);
+      })
+      .catch(error => console.error(error));
   };
 
   return (
-    <div className="flex flex-col items-center p-4 bg-white min-h-screen">
-      <h1 className="text-3xl text-slate-800 mt-16 font-extrabold">Amharic News Classifier</h1>
-      <div className="bg-slate-800 w-full max-w-lg rounded-lg shadow-lg p-4 mt-16">
-        <div className="h-96 overflow-y-auto">
-          {messages.map((msg, index) => (
-            <div key={index} className={`chat ${msg.sender === "user" ? "chat-end" : "chat-start"}`}>
-              <div className="chat-bubble bg-white text-black">
-                {msg.text}
-              </div>
-            </div>
-          ))}
+    <div className="min-h-screen bg-gray-100 p-4">
+      <div className="max-w-2xl mx-auto bg-white shadow-md rounded-md p-6 space-y-6">
+        <h1 className="text-2xl font-bold text-center">Automatic Prompt Generation</h1>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Upload PDF File</span>
+          </label>
+          <input type="file" className="file-input file-input-bordered w-full" onChange={handleFileChange} />
         </div>
-        <div className="flex mt-4">
-          <input
-            type="text"
-            className="input input-bordered flex-grow bg-white text-black"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSend()}
-          />
-          <button className="btn btn-primary ml-2 bg-white text-black" onClick={handleSend}>
-            Send
-          </button>
+        <div className="form-control">
+          <label className="label">
+            <span className="label-text">Enter Text Prompt</span>
+          </label>
+          <textarea className="textarea textarea-bordered h-24" value={textPrompt} onChange={handlePromptChange}></textarea>
+        </div>
+        <button className="btn btn-primary w-full" onClick={handleUpload}>Generate Prompts</button>
+        <div>
+          <h2 className="text-xl font-bold mt-4">Generated Prompts</h2>
+          <div className="space-y-2 mt-2">
+            {prompts.map((prompt, index) => (
+              <div key={index} className="p-4 bg-gray-200 rounded-md">
+                {prompt}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
   );
 };
+
+
 
 export default ChatBox;
