@@ -5,6 +5,7 @@ from utils.pdf_utils import MyPDF
 from utils.text_splitter_utils import MyTextSplitter
 from utils.vector_store_utils import MyVectorStore
 from utils.langchain import MyLangChain
+from ragas import RagasEvaluator
 
 app = Flask(__name__)
 CORS(app)
@@ -33,8 +34,6 @@ def generate_prompt():
         "num_of_prompts_to_generate": 5,
     })
 
-    print(result)
-
     response_content = result['response'].content
 
     if isinstance(response_content, str):
@@ -44,9 +43,28 @@ def generate_prompt():
         except json.JSONDecodeError as e:
             return jsonify({'error': 'Invalid JSON response', 'details': str(e)}), 500
 
-        return jsonify({'prompts': prompts_generated})
+        # Prepare the evaluation data
+        evaluation_data = [
+            {"question": generated_prompt, "context": raw_text, "ground_truths": ""} 
+            for generated_prompt in prompts_generated
+        ]
 
-    return jsonify({'error': 'Invalid response format'}), 500
+        # Initialize Ragas Evaluator
+        evaluator = RagasEvaluator()
+
+        # Evaluate each generated prompt
+        scores = []
+        for data in evaluation_data:
+            score = evaluator.evaluate(data["question"], data["context"], data["ground_truths"])
+            scores.append(score)
+
+        # Sort prompts based on scores and select the top 5
+        sorted_prompts = sorted(zip(prompts_generated, scores), key=lambda x: x[1], reverse=True)
+        best_prompts = [prompt for prompt, _ in sorted_prompts[:5]]
+
+        return jsonify({'prompts': best_prompts})
+    else:
+        return jsonify({'error': 'Invalid response format'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, port=5003)

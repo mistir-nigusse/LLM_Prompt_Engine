@@ -1,0 +1,29 @@
+LLM_Prompt_Engine
+   |_ backend
+        |_ tests
+           |_ tests
+             |_test_evaluation_data_generation.py
+             |_test_prompt_generation.py
+             |_test_prompt_testing.py
+        |_ utils
+            |_langchain.py
+            |_pdf_utils.py
+            |_text_splitter_utils.py
+            |_vector_store_utils.py
+        |_ app.py
+        |_ config.py
+        |_ requirements.txt
+   |_ frontend
+       |_src
+          |_components
+             |_chatbox.js
+          |_app.js
+          |_index.js
+          |_index.css
+        |_package-lock.json
+        |_package.json
+        |_README.md
+        |_tailwind.config.js
+   |_ .gitignore
+   |_ License
+   |_ README.md
