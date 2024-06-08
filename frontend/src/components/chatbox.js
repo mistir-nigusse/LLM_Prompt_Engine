@@ -19,7 +19,7 @@ const ChatBox = () => {
     formData.append('pdf', pdfFile);
     formData.append('prompt', textPrompt);
 
-    axios.post('http://localhost:5000/generate_prompt', formData)
+    axios.post('http://127.0.0.1:5000/get_prompt', formData)
       .then(response => {
         setPrompts(response.data.prompts);
       })
