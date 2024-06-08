@@ -1,13 +1,15 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import json
 from utils.pdf_utils import MyPDF
 from utils.text_splitter_utils import MyTextSplitter
 from utils.vector_store_utils import MyVectorStore
+from utils.langchain import MyLangChain
 
 app = Flask(__name__)
 CORS(app)
 
-@app.route('/get_prompt', methods=['POST'])
+@app.route('/get_prompts', methods=['POST'])
 def generate_prompt():
     pdf = request.files['pdf']
     prompt = request.form['prompt']
@@ -23,14 +25,27 @@ def generate_prompt():
 
     retriever = vector_store.get_retriever(chroma_vector_store)
 
-    # placeholder response
-    generated_prompts = [
-        f"Generated prompt 1 for: {prompt}",
-        f"Generated prompt 2 for: {prompt}",
-        f"Generated prompt 3 for: {prompt}"
-    ]
+    langchain = MyLangChain()
+    conversation_chain = langchain.generate_prompts_chain(base_retriever=retriever)
 
-    return jsonify({'prompts': generated_prompts})
+    result = conversation_chain.invoke({
+        "user_prompt": prompt,
+        "num_of_prompts_to_generate": 5,
+    })
+
+    response_content = result['response'].content
+
+    if isinstance(response_content, str):
+        response_content = response_content.strip()
+        try:
+            prompts_generated = json.loads(response_content)
+        except json.JSONDecodeError as e:
+            return jsonify({'error': 'Invalid JSON response', 'details': str(e)}), 500
+
+
+        return jsonify({'prompts': prompts_generated})
+    else:
+        return jsonify({'error': 'Invalid response format'}), 500
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5003)
