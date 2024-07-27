@@ -17,7 +17,7 @@ PromptlyTech’s service evaluates and ranks different prompts based on effectiv
 
 
 Folder Structure:
-
+```bash
 LLM_Prompt_Engine/
 |_ backend/
    |_ tests/
@@ -46,7 +46,7 @@ LLM_Prompt_Engine/
 |_ .gitignore
 |_ License
 |_ README.md
-
+```
 Backend:
 
 The backend directory contains the Flask API and utility files for prompt generation and evaluation.
