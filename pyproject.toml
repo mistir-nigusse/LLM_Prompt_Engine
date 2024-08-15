@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "llm_prompt_engine"
+version = "0.1.0"
+description = "A prompt engine for large language models"
+authors = ["Mistir Nigusse <mistirnigusse0@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+# Add your other dependencies here
+
+[tool.poetry.dev-dependencies]
+pytest = "^7.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
